@@ -8,27 +8,24 @@ The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. I
 
 ## Recently Completed
 
-- [x] Base Next.js 16 setup with App Router
-- [x] TypeScript configuration with strict mode
-- [x] Tailwind CSS 4 integration
-- [x] ESLint configuration
-- [x] Memory bank documentation
-- [x] Recipe system for common features
-- [x] Built complete MatatuConnect Kenya transport system
-- [x] Removed "What Passengers Say" reviews section, added feedback CTA
-- [x] Database migration attempts for Vercel deployment:
-  - Vercel Postgres - Failed (Drizzle type incompatibility)
-  - Turso DB - Failed (LibSQL HTTP client incompatible with Drizzle ORM)
-  - **Solution: Replaced Drizzle ORM with raw SQL queries**
-- [x] Complete rewrite of all 15 API routes to use raw SQL
-- [x] New `src/lib/db.ts` supports both SQLite (local) and Vercel Postgres (production)
-- [x] Fixed registration failure by replacing @vercel/postgres with pg library
-- [x] Added convertQuery() function to convert ? placeholders to PostgreSQL $1, $2 syntax
-- [x] Created .env file with environment variables for local development (SQLite)
-- [x] Build passes: `bun typecheck && bun lint`
-- [x] Created `/lib/env.ts` environment loader with Vercel/SQLite auto-detection
-- [x] Created `.env.local` file for development
-- [x] Updated `db.ts`, `auth.ts`, `rate-limit.ts` to use env module
+- [x] Update .env.production with correct Supabase project ID `jmrgooqidunwswiqhkie`
+- [x] Add Supabase URL and anon key to env.ts
+- [x] Create .env.local for local development
+- [x] Updated .env.production with clearer Vercel setup instructions
+
+## Current Issues
+
+**Error**: `getaddrinfo ENOTFOUND db.jmrgooqidunwswiqhkie.supabase.co`
+
+**Possible causes**:
+1. Supabase project is paused (free tier gets paused after inactivity)
+2. DATABASE_URL not set in Vercel Environment Variables
+3. DATABASE_URL still contains placeholder `[YOUR-PASSWORD]` instead of actual password
+
+**Required action**: User needs to check:
+- Go to Supabase Dashboard → Your Project → check if project is "Active" (not paused)
+- Set DATABASE_URL in Vercel with actual password (not placeholder)
+- Redeploy after setting variables
 
 ## Current Structure
 
