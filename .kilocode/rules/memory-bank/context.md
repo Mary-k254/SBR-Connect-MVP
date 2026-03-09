@@ -26,6 +26,9 @@ The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. I
 - [x] Added convertQuery() function to convert ? placeholders to PostgreSQL $1, $2 syntax
 - [x] Created .env file with environment variables for local development (SQLite)
 - [x] Build passes: `bun typecheck && bun lint`
+- [x] Created `/lib/env.ts` environment loader with Vercel/SQLite auto-detection
+- [x] Created `.env.local` file for development
+- [x] Updated `db.ts`, `auth.ts`, `rate-limit.ts` to use env module
 
 ## Current Structure
 
@@ -117,3 +120,4 @@ On Vercel:
 | 2024-03 | Complete rewrite: Replaced Drizzle ORM with raw SQL queries for Vercel compatibility |
 | 2024-03 | Fixed registration: Switched from @vercel/postgres to pg library for proper parameterized queries |
 | 2024-03 | Created .env file with environment variables for local development (SQLite) |
+| 2024-03 | Created env.ts loader with Vercel/SQLite auto-detection and JWT secret generation |
