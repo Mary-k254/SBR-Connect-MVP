@@ -41,7 +41,10 @@ function getPgPool(): Pool {
     
     pgPool = new Pool({
       connectionString: connectionString,
-      ssl: env.isProduction ? { rejectUnauthorized: false } : false,
+      ssl: env.isProduction ? { 
+        rejectUnauthorized: false,
+        require: true,
+      } : false,
     });
     
     // Test the connection
