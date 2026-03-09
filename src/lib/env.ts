@@ -72,6 +72,12 @@ function detectVercel(): boolean {
   console.log("  DATABASE_URL:", hasDatabaseUrl ? "set" : "not set");
   console.log("  NODE_ENV:", process.env.NODE_ENV);
   
+  // Debug: List all URL-related env vars
+  const urlVars = Object.keys(process.env).filter(k => 
+    k.includes('URL') || k.includes('DATABASE') || k.includes('POSTGRES') || k.includes('DB_')
+  );
+  console.log("  URL-related vars:", urlVars);
+  
   return hasPostgresUrl || hasDatabaseUrl;
 }
 

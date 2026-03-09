@@ -36,21 +36,44 @@ function getPgPool(): Pool {
     console.log("Is production:", env.isProduction);
     
     if (!connectionString) {
-      throw new Error("No database connection string available. Please set POSTGRES_URL or DATABASE_URL");
+      const error = "No database connection string available. Please set POSTGRES_URL or DATABASE_URL environment variable in Vercel.";
+      console.error("❌ " + error);
+      console.error("Available env vars:", Object.keys(process.env).filter(k => k.includes('URL') || k.includes('DATABASE') || k.includes('POSTGRES')));
+      throw new Error(error);
     }
+    
+    // Supabase requires specific SSL configuration
+    const sslConfig = env.isProduction ? { 
+      rejectUnauthorized: false,
+      require: true,
+    } : false;
+    
+    console.log("SSL config:", JSON.stringify(sslConfig));
     
     pgPool = new Pool({
       connectionString: connectionString,
-      ssl: env.isProduction ? { 
-        rejectUnauthorized: false,
-        require: true,
-      } : false,
+      ssl: sslConfig,
+      max: 20,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 10000,
     });
     
-    // Test the connection
+    // Test the connection immediately
     pgPool.on('error', (err) => {
       console.error('PostgreSQL pool error:', err);
     });
+    
+    // Test connection on startup
+    (async () => {
+      try {
+        const client = await pgPool!.connect();
+        const result = await client.query('SELECT NOW()');
+        console.log("✅ PostgreSQL connected, server time:", result.rows[0].now);
+        client.release();
+      } catch (err) {
+        console.error("❌ PostgreSQL connection test failed:", err);
+      }
+    })();
   }
   return pgPool;
 }
