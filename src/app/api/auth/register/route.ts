@@ -91,6 +91,21 @@ export async function POST(request: NextRequest) {
     return addRateLimitHeaders(response, request);
   } catch (error) {
     console.error("Registration error:", error);
+    
+    // Provide more detailed error message
+    if (error instanceof Error) {
+      if (error.message.includes("database connection")) {
+        return NextResponse.json(
+          { error: "Database connection failed. Please check environment configuration." },
+          { status: 500 }
+        );
+      }
+      return NextResponse.json(
+        { error: "Registration failed: " + error.message },
+        { status: 500 }
+      );
+    }
+    
     return NextResponse.json({ error: "Registration failed" }, { status: 500 });
   }
 }

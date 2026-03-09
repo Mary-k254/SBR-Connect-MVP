@@ -30,9 +30,23 @@ function getPgPool(): Pool {
   if (!pgPool) {
     // Use DATABASE_URL if POSTGRES_URL is not set (e.g., Supabase)
     const connectionString = env.POSTGRES_URL || env.DATABASE_URL;
+    
+    console.log("Creating PostgreSQL pool...");
+    console.log("Connection string present:", !!connectionString);
+    console.log("Is production:", env.isProduction);
+    
+    if (!connectionString) {
+      throw new Error("No database connection string available. Please set POSTGRES_URL or DATABASE_URL");
+    }
+    
     pgPool = new Pool({
       connectionString: connectionString,
       ssl: env.isProduction ? { rejectUnauthorized: false } : false,
+    });
+    
+    // Test the connection
+    pgPool.on('error', (err) => {
+      console.error('PostgreSQL pool error:', err);
     });
   }
   return pgPool;
@@ -526,16 +540,28 @@ export async function dbAll(query: string, params: any[] = []) {
 
 // Insert and get the last insert ID
 export async function dbInsert(query: string, params: any[] = []) {
+  console.log("dbInsert called, useSqlite:", env.useSqlite);
+  
   if (!env.useSqlite) {
     // Use Postgres - need to use RETURNING id in query
-    const convertedQuery = convertQuery(query);
-    const pool = getPgPool();
-    const result = await pool.query(convertedQuery, params);
-    // For PostgreSQL with RETURNING id, the id is in the first row
-    if (result.rows && result.rows.length > 0) {
-      return result.rows[0].id;
+    try {
+      const convertedQuery = convertQuery(query);
+      console.log("PostgreSQL query:", convertedQuery);
+      console.log("Parameters:", params);
+      
+      const pool = getPgPool();
+      const result = await pool.query(convertedQuery, params);
+      console.log("Query result:", result.rows);
+      
+      // For PostgreSQL with RETURNING id, the id is in the first row
+      if (result.rows && result.rows.length > 0) {
+        return result.rows[0].id;
+      }
+      return result.rowCount;
+    } catch (error) {
+      console.error("PostgreSQL insert error:", error);
+      throw error;
     }
-    return result.rowCount;
   } else {
     // Use SQLite
     const result = await dbExecute(query, params);
