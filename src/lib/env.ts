@@ -18,6 +18,7 @@ import { randomBytes } from "crypto";
 export interface EnvConfig {
   // Database
   POSTGRES_URL: string | undefined;
+  DATABASE_URL: string | undefined;  // Supabase and other providers use this
   isProduction: boolean;
   isVercel: boolean;
   useSqlite: boolean;
@@ -58,18 +59,19 @@ const DEFAULTS = {
 // =====================================================
 
 /**
- * Check if we're running on Vercel
+ * Check if we're running on Vercel or have a database URL
  * Vercel automatically sets POSTGRES_URL when using Vercel Postgres
+ * Supabase and other providers may use DATABASE_URL
  */
 function detectVercel(): boolean {
-  return !!process.env.POSTGRES_URL;
+  return !!(process.env.POSTGRES_URL || process.env.DATABASE_URL);
 }
 
 /**
  * Check if we should use SQLite (local development)
  */
 function shouldUseSqlite(): boolean {
-  return !process.env.POSTGRES_URL;
+  return !(process.env.POSTGRES_URL || process.env.DATABASE_URL);
 }
 
 /**
@@ -106,9 +108,10 @@ function getJwtSecret(): string {
 function validateEnv(config: EnvConfig): void {
   const errors: string[] = [];
   
-  // In production, we require POSTGRES_URL
-  if (config.isProduction && !config.POSTGRES_URL) {
-    errors.push("POSTGRES_URL is required in production (Vercel sets this automatically)");
+  // In production, we require either POSTGRES_URL or DATABASE_URL
+  const hasDatabaseUrl = config.POSTGRES_URL || config.DATABASE_URL;
+  if (config.isProduction && !hasDatabaseUrl) {
+    errors.push("POSTGRES_URL or DATABASE_URL is required in production");
   }
   
   // JWT_SECRET should always be set (we generate one if missing)
@@ -153,6 +156,7 @@ export function loadEnv(): EnvConfig {
   const config: EnvConfig = {
     // Database
     POSTGRES_URL: process.env.POSTGRES_URL,
+    DATABASE_URL: process.env.DATABASE_URL,
     isProduction: nodeEnv === "production",
     isVercel,
     useSqlite,

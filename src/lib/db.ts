@@ -28,8 +28,10 @@ function convertQuery(query: string): string {
 // Get or create PostgreSQL pool
 function getPgPool(): Pool {
   if (!pgPool) {
+    // Use DATABASE_URL if POSTGRES_URL is not set (e.g., Supabase)
+    const connectionString = env.POSTGRES_URL || env.DATABASE_URL;
     pgPool = new Pool({
-      connectionString: env.POSTGRES_URL,
+      connectionString: connectionString,
       ssl: env.isProduction ? { rejectUnauthorized: false } : false,
     });
   }
