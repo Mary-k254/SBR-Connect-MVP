@@ -64,7 +64,15 @@ const DEFAULTS = {
  * Supabase and other providers may use DATABASE_URL
  */
 function detectVercel(): boolean {
-  return !!(process.env.POSTGRES_URL || process.env.DATABASE_URL);
+  const hasPostgresUrl = !!process.env.POSTGRES_URL;
+  const hasDatabaseUrl = !!process.env.DATABASE_URL;
+  
+  console.log("Environment check:");
+  console.log("  POSTGRES_URL:", hasPostgresUrl ? "set" : "not set");
+  console.log("  DATABASE_URL:", hasDatabaseUrl ? "set" : "not set");
+  console.log("  NODE_ENV:", process.env.NODE_ENV);
+  
+  return hasPostgresUrl || hasDatabaseUrl;
 }
 
 /**
