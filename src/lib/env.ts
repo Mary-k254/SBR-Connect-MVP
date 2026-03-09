@@ -23,6 +23,10 @@ export interface EnvConfig {
   isVercel: boolean;
   useSqlite: boolean;
   
+  // Supabase (Optional)
+  NEXT_PUBLIC_SUPABASE_URL: string | undefined;
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: string | undefined;
+  
   // Authentication
   JWT_SECRET: string;
   
@@ -174,6 +178,10 @@ export function loadEnv(): EnvConfig {
     isProduction: nodeEnv === "production",
     isVercel,
     useSqlite,
+    
+    // Supabase
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     
     // Authentication
     JWT_SECRET: getJwtSecret(),
