@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
+import { loadEnv } from "./env";
+
+// Load environment configuration
+const env = loadEnv();
 
 // Simple in-memory rate limiter (for MVP)
 // In production, use Redis-based rate limiting with @upstash/ratelimit
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 
 // Rate limit configuration
-const RATE_LIMIT = parseInt(process.env.API_RATE_LIMIT || "100", 10);
+const RATE_LIMIT = env.API_RATE_LIMIT;
 const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
 
 export interface RateLimitResult {

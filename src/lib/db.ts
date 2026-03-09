@@ -5,9 +5,13 @@ import { Pool } from "pg";
 import Database from "better-sqlite3";
 import path from "path";
 import fs from "fs";
+import { loadEnv } from "./env";
+
+// Load environment configuration
+const env = loadEnv();
 
 // Determine if we're running on Vercel (has POSTGRES_URL env var)
-const isVercel = !!process.env.POSTGRES_URL;
+const isVercel = env.isVercel;
 
 // PostgreSQL connection pool for Vercel
 let pgPool: Pool | null = null;
@@ -25,8 +29,8 @@ function convertQuery(query: string): string {
 function getPgPool(): Pool {
   if (!pgPool) {
     pgPool = new Pool({
-      connectionString: process.env.POSTGRES_URL,
-      ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
+      connectionString: env.POSTGRES_URL,
+      ssl: env.isProduction ? { rejectUnauthorized: false } : false,
     });
   }
   return pgPool;
@@ -34,14 +38,14 @@ function getPgPool(): Pool {
 
 // Initialize the appropriate database based on environment
 export async function initializeDatabase() {
-  if (isVercel) {
-    // On Vercel: Use Postgres - tables should already exist
-    console.log("Using Vercel Postgres database");
-    await initializePostgresTables();
-  } else {
+  if (env.useSqlite) {
     // Local: Use SQLite
     console.log("Using local SQLite database");
     initializeSqlite();
+  } else {
+    // On Vercel: Use Postgres - tables should already exist
+    console.log("Using Vercel Postgres database");
+    await initializePostgresTables();
   }
 }
 
@@ -476,7 +480,7 @@ function initializeSqlite() {
 
 // Execute a query - uses appropriate database based on environment
 export async function dbQuery(query: string, params: any[] = []) {
-  if (isVercel) {
+  if (!env.useSqlite) {
     // Use Postgres with converted query
     const convertedQuery = convertQuery(query);
     const pool = getPgPool();
@@ -492,7 +496,7 @@ export async function dbQuery(query: string, params: any[] = []) {
 
 // Execute an insert/update/delete - returns the result
 export async function dbExecute(query: string, params: any[] = []) {
-  if (isVercel) {
+  if (!env.useSqlite) {
     // Use Postgres with converted query
     const convertedQuery = convertQuery(query);
     const pool = getPgPool();
@@ -520,7 +524,7 @@ export async function dbAll(query: string, params: any[] = []) {
 
 // Insert and get the last insert ID
 export async function dbInsert(query: string, params: any[] = []) {
-  if (isVercel) {
+  if (!env.useSqlite) {
     // Use Postgres - need to use RETURNING id in query
     const convertedQuery = convertQuery(query);
     const pool = getPgPool();

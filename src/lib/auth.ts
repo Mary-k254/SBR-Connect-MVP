@@ -1,8 +1,10 @@
 import bcrypt from "bcryptjs";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
+import { loadEnv } from "./env";
 
-const JWT_SECRET = process.env.JWT_SECRET || "matatu-kenya-secret-key-2024-secure";
+const env = loadEnv();
+const JWT_SECRET = env.JWT_SECRET;
 const JWT_EXPIRES_IN = "7d";
 
 export interface JWTPayload {
@@ -55,7 +57,7 @@ export function setAuthCookie(token: string) {
     name: "auth_token",
     value: token,
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: env.isProduction,
     sameSite: "lax" as const,
     maxAge: 60 * 60 * 24 * 7, // 7 days
     path: "/",
